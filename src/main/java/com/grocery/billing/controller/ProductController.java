@@ -1,8 +1,9 @@
 package com.grocery.billing.controller;
 
 import com.grocery.billing.model.Product;
-import com.grocery.billing.repository.ProductRepository;
+import com.grocery.billing.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,30 +14,35 @@ import java.util.List;
 public class ProductController {
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductService productService;
 
     @GetMapping
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public ResponseEntity<List<Product>> getAllProducts(@RequestParam(required = false) Long shopId) {
+        List<Product> products = productService.getAllProducts(shopId);
+        return ResponseEntity.ok(products);
     }
 
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
-        return productRepository.save(product);
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        Product createdProduct = productService.createProduct(product);
+        return ResponseEntity.ok(createdProduct);
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
-        Product product = productRepository.findById(id).orElseThrow();
-        product.setName(productDetails.getName());
-        product.setPrice(productDetails.getPrice());
-        product.setStock(productDetails.getStock());
-        product.setBarcode(productDetails.getBarcode());
-        return productRepository.save(product);
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
+        Product updatedProduct = productService.updateProduct(id, productDetails);
+        return ResponseEntity.ok(updatedProduct);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable Long id) {
-        productRepository.deleteById(id);
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        Product product = productService.getProductById(id);
+        return ResponseEntity.ok(product);
     }
 }

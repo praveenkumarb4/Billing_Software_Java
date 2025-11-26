@@ -1,8 +1,9 @@
 package com.grocery.billing.controller;
 
 import com.grocery.billing.model.Bill;
-import com.grocery.billing.repository.BillRepository;
+import com.grocery.billing.service.BillService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,32 +14,23 @@ import java.util.List;
 public class BillController {
 
     @Autowired
-    private BillRepository billRepository;
-
-    @Autowired
-    private com.grocery.billing.repository.ProductRepository productRepository;
+    private BillService billService;
 
     @GetMapping
-    public List<Bill> getAllBills() {
-        return billRepository.findAll();
+    public ResponseEntity<List<Bill>> getAllBills(@RequestParam(required = false) Long shopId) {
+        List<Bill> bills = billService.getAllBills(shopId);
+        return ResponseEntity.ok(bills);
     }
 
     @PostMapping
-    public Bill createBill(@RequestBody Bill bill) {
-        // Update stock for each item
-        for (com.grocery.billing.model.BillItem item : bill.getItems()) {
-            com.grocery.billing.model.Product product = productRepository.findById(item.getProduct().getId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-            
-            if (product.getStock() < item.getQuantity()) {
-                throw new RuntimeException("Insufficient stock for product: " + product.getName());
-            }
-            
-            product.setStock(product.getStock() - item.getQuantity());
-            productRepository.save(product);
-        }
+    public ResponseEntity<Bill> createBill(@RequestBody Bill bill) {
+        Bill createdBill = billService.createBill(bill);
+        return ResponseEntity.ok(createdBill);
+    }
 
-        bill.setDate(java.time.LocalDateTime.now());
-        return billRepository.save(bill);
+    @GetMapping("/{id}")
+    public ResponseEntity<Bill> getBillById(@PathVariable Long id) {
+        Bill bill = billService.getBillById(id);
+        return ResponseEntity.ok(bill);
     }
 }

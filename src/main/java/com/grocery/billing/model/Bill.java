@@ -12,11 +12,9 @@ public class Bill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Customer customer;
-
     private LocalDateTime date;
     private Double totalAmount;
+    private Long shopId;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<BillItem> items;

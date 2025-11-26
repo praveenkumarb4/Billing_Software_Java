@@ -17,4 +17,5 @@ public class Product {
     private Double price;
     private Double stock;
     private String barcode;
+    private Long shopId;
 }
